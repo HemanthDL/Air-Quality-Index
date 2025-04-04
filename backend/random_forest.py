@@ -1,26 +1,31 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-import pickle
+from joblib import dump
 
+
+# Loading the data 
 def load_data(filename):
     data = pd.read_csv(filename)
-    X = data[['co', 'no', 'no2', 'o3', 'so2', 'pm2_5', 'pm10', 'nh3']]
-    y = data['aqi']
+    X = data[['components.co', 'components.no', 'components.no2', 'components.o3', 'components.so2', 'components.pm2_5', 'components.pm10', 'components.nh3']]
+    y = data['main.aqi']
     return X, y
 
+
+# Training using random forest algorithm
 def train_model(X, y):
-    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf_model = RandomForestClassifier(n_estimators=100, random_state=42,n_jobs=1)
     rf_model.fit(X, y)
     return rf_model
 
-def save_model(model, filename):
-    with open(filename, 'wb') as model_file:
-        pickle.dump(model, model_file)
 
-X_train, y_train = load_data('KACities.csv')
+#saving the trained data as pkl file
+def save_model(model, filename):
+    dump(model, filename)
+
+X_train, y_train = load_data('API_dataset_allcities.csv')
 
 rf_model = train_model(X_train, y_train)
 
-save_model(rf_model, 'random_forest_model.pkl')
+save_model(rf_model, 'random_forest_algo_model.pkl')
 
 print("Model trained and saved!")

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion'; // Import motion from framer-motion
 import './App.css'; // Import the custom CSS for styling
@@ -7,10 +7,31 @@ function App() {
   const [city, setCity] = useState('');
   const [aqi, setAqi] = useState(null);
   const [composition, setComposition] = useState(null);
+  const [cities, setcities] = useState([])
+
+
+
+
+  useEffect(() => {
+    fetchCities()
+  }, [])
+
+  const fetchCities = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/cities')
+
+      setcities(response.data.cities)
+
+    } catch (error) {
+      console.error('Error fetching prediction:', error);
+    }
+
+  }
+
 
   const handleCityChange = (event) => {
     console.log(event.target.value);
-    
+
     setCity(event.target.value);
   };
 
@@ -44,11 +65,11 @@ function App() {
           Select City:
           <select onChange={handleCityChange} value={city} className="city-select">
             <option value="">--Select a City--</option>
-            <option value="Bengaluru">Bengaluru</option>
-            <option value="Hassan">Hassan</option>
-            <option value="Mangaluru">Mangaluru</option>
-            <option value="Kolar">Kolar</option>
-            <option value="Mysuru">Mysuru</option>
+            {cities.map((cityName) => (
+              <option key={cityName} value={cityName}>
+                {cityName}
+              </option>
+            ))}
           </select>
         </label>
         <motion.button
@@ -77,6 +98,14 @@ function App() {
           >
             Predicted AQI: {aqi}
           </motion.h3>
+          <motion.h4
+          style={{display:'flex',flexDirection : 'row'}}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            <p>City : </p><p style={{color : 'blue'}}>&nbsp;&nbsp;{city}</p>
+          </motion.h4>
           <motion.div
             className="composition-table-container"
             initial={{ opacity: 0 }}

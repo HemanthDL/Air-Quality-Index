@@ -2,14 +2,13 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pandas as pd
 import requests
-import pickle
+from joblib import load
 
-# Load the pre-trained model using pickle
-def load_model(model_path='random_forest_model.pkl'):
-    with open(model_path, 'rb') as model_file:
-        return pickle.load(model_file)
 
-rf_model = load_model('random_forest_model.pkl')
+# Load the pre-trained model
+def load_model(model_path='random_forest_algo_model.pkl'):
+    return load(model_path)
+
 
 # Function to fetch real-time air pollution data using OpenWeatherMap API
 def fetch_real_time_data(api_key, lat, lon):
@@ -28,25 +27,58 @@ def fetch_real_time_data(api_key, lat, lon):
     else:
         raise ValueError("No data available for the specified location")
 
+
+# Loading pkl file
+rf_model = load_model('random_forest_algo_model.pkl')
+
 # Initialize Flask app
 app = Flask(__name__)
+# CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-CORS(app)
 
-
-# Define city to coordinates mapping (You can expand this mapping for more cities)
 city_coordinates = {
-    'Bengaluru': {'lat': 12.9716, 'lon': 77.5946},
-    'Hassan': {'lat': 13.0033, 'lon': 76.1004},
-    'Mysuru': {'lat': 12.2958, 'lon': 76.6394},
-    'Mangaluru': {'lat': 12.9141, 'lon': 74.8560},
-    'Kolar': {'lat': 13.1291, 'lon': 78.1285}
+    "Hassan": {"lat": 13.0033, "lon": 76.1004},
+    "Bengaluru": {"lat": 12.9716, "lon": 77.5946},
+    "Mumbai": {"lat": 19.0760, "lon": 72.8777},
+    "Delhi": {"lat": 28.6139, "lon": 77.2090},
+    "Mysuru": {"lat": 12.2958, "lon": 76.6394},
+    "Chennai": {"lat": 13.0827, "lon": 80.2707},
+    "Kolkata": {"lat": 22.5726, "lon": 88.3639},
+    "Hyderabad": {"lat": 17.3850, "lon": 78.4867},
+    "Pune": {"lat": 18.5204, "lon": 73.8567},
+    "Jaipur": {"lat": 26.9124, "lon": 75.7873},
+    "Ahmedabad": {"lat": 23.0225, "lon": 72.5714},
+    "Chandigarh": {"lat": 30.7333, "lon": 76.7794},
+    "Lucknow": {"lat": 26.8467, "lon": 80.9462},
+    "Indore": {"lat": 22.7196, "lon": 75.8577},
+    "Coimbatore": {"lat": 11.0168, "lon": 76.9558},
+    "Surat": {"lat": 21.1702, "lon": 72.8311},
+    "Vadodara": {"lat": 22.3072, "lon": 73.1812},
+    "Nagpur": {"lat": 21.1458, "lon": 79.0882},
+    "Bhopal": {"lat": 23.2599, "lon": 77.4126},
+    "Patna": {"lat": 25.5941, "lon": 85.1376},
+    "Ranchi": {"lat": 23.3441, "lon": 85.3096},
+    "Madurai": {"lat": 9.9250, "lon": 78.1193},
+    "Agra": {"lat": 27.1767, "lon": 78.0081},
+    "Varanasi": {"lat": 25.3176, "lon": 82.9739},
+    "Ludhiana": {"lat": 30.9008, "lon": 75.8573},
+    "Amritsar": {"lat": 31.5497, "lon": 74.3436},
+    "Faridabad": {"lat": 28.4089, "lon": 77.3178}
 }
+
+@app.route('/cities',methods=['GET'])
+def get_cities():
+    # cities = city_coordinates.keys()
+    # return jsonify({
+    #     cities : cities
+    # })
+    return jsonify({"cities": list(city_coordinates.keys())})
+
 
 # Route to get AQI prediction and composition for a selected city
 @app.route('/predict', methods=['POST'])
 def predict_aqi():
-    # Get city name from the request
     data = request.get_json()
     city = data.get('city')
 
@@ -55,14 +87,23 @@ def predict_aqi():
     
     lat, lon = city_coordinates[city]['lat'], city_coordinates[city]['lon']
 
-    # Fetch the real-time air quality data for the city
     try:
-        api_key = '770f56fec010799b22416015a76a31c5'  # Replace with your OpenWeatherMap API key
+        api_key = '770f56fec010799b22416015a76a31c5'  
         real_time_data = fetch_real_time_data(api_key, lat, lon)
         
         # Prepare the data for prediction
         real_time_df = pd.DataFrame([real_time_data])
-        real_time_df = real_time_df[['co', 'no', 'no2', 'o3', 'so2', 'pm2_5', 'pm10', 'nh3']]
+        real_time_df = real_time_df.rename(columns={
+            'co': 'components.co',
+            'no': 'components.no',
+            'no2': 'components.no2',
+            'o3': 'components.o3',
+            'so2': 'components.so2',
+            'pm2_5': 'components.pm2_5',
+            'pm10': 'components.pm10',
+            'nh3': 'components.nh3'
+        })
+        real_time_df = real_time_df[['components.co', 'components.no', 'components.no2', 'components.o3','components.so2', 'components.pm2_5', 'components.pm10', 'components.nh3']]
         
         # Predict AQI Class using the loaded RandomForestClassifier
         prediction_rf = rf_model.predict(real_time_df)
