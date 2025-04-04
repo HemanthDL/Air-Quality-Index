@@ -17,7 +17,7 @@ This project aims to predict the Air Quality Index (AQI) for selected cities in 
 ## 📊 Model Performance
 - **Algorithm Used:** Random Forest Classifier
 - **Dataset Size:** 100,000+ records
-- **Accuracy:** *92%* (Specify the actual accuracy here)
+- **Accuracy:** *92%* 
 
 ## 🔧 Installation & Setup
 ### 1️⃣ Backend Setup
