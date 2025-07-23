@@ -3,10 +3,15 @@ from flask_cors import CORS
 import pandas as pd
 import requests
 from joblib import load
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+pkl_local_path = os.environ.get("PKL_LOCAL_PATH")
 
 # Load the pre-trained model
-def load_model(model_path='random_forest_algo_model.pkl'):
+def load_model(model_path):
     return load(model_path)
 
 
@@ -29,7 +34,8 @@ def fetch_real_time_data(api_key, lat, lon):
 
 
 # Loading pkl file
-rf_model = load_model('random_forest_algo_model.pkl')
+rf_model = load_model(pkl_local_path)
+# rf_model = load_model('random_forest_algo_model.pkl')
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -88,7 +94,8 @@ def predict_aqi():
     lat, lon = city_coordinates[city]['lat'], city_coordinates[city]['lon']
 
     try:
-        api_key = '770f56fec010799b22416015a76a31c5'  
+        api_key = os.environ.get("OPEN_WEATHER_API")
+        print("API key",api_key)
         real_time_data = fetch_real_time_data(api_key, lat, lon)
         
         # Prepare the data for prediction
