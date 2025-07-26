@@ -33,7 +33,7 @@ def fetch_real_time_data(api_key, lat, lon):
 
 rf_model = load_model(pkl_local_path)
 
-app = Flask(__name__, static_folder='static\dist', static_url_path='/static')
+app = Flask(__name__, static_folder='static/dist', static_url_path='/static')
 CORS(app)
 
 city_coordinates = {
@@ -120,6 +120,6 @@ def predict_aqi():
 
 @app.route('/')
 def serve_react_app():
-    print(os.path.join(app.root_path, 'static\dist'))
-    return send_from_directory(os.path.join(app.root_path, 'static\dist'), 'index.html')
+    print(os.path.join(app.root_path, 'static/dist'))
+    return send_from_directory(os.path.join(app.root_path, 'static/dist'), 'index.html')
 
