@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 pkl_local_path = os.environ.get("PKL_LOCAL_PATH")
+open_weather_map_api = os.environ.get("OPEN_WEATHER_API_URL")
 
 # Load the pre-trained model
 def load_model(model_path):
@@ -17,7 +18,7 @@ def load_model(model_path):
 
 # Function to fetch real-time air pollution data using OpenWeatherMap API
 def fetch_real_time_data(api_key, lat, lon):
-    url = "http://api.openweathermap.org/data/2.5/air_pollution"
+    url = open_weather_map_api
     params = {
         "lat": lat,
         "lon": lon,
@@ -33,14 +34,13 @@ def fetch_real_time_data(api_key, lat, lon):
         raise ValueError("No data available for the specified location")
 
 
-# Loading pkl file
 rf_model = load_model(pkl_local_path)
 # rf_model = load_model('random_forest_algo_model.pkl')
 
-# Initialize Flask app
+
 app = Flask(__name__)
-# CORS(app)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
+# CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 city_coordinates = {
@@ -94,7 +94,7 @@ def predict_aqi():
     lat, lon = city_coordinates[city]['lat'], city_coordinates[city]['lon']
 
     try:
-        api_key = os.environ.get("OPEN_WEATHER_API")
+        api_key = os.environ.get("OPEN_WEATHER_API_KEY")
         print("API key",api_key)
         real_time_data = fetch_real_time_data(api_key, lat, lon)
         
