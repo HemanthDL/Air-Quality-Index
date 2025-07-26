@@ -18,7 +18,7 @@ function App() {
 
   const fetchCities = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/cities')
+      const response = await axios.get('/cities')
 
       setcities(response.data.cities)
 
@@ -37,7 +37,7 @@ function App() {
   const handleSubmit = async () => {
     setLoading(true)
     try {
-      const response = await axios.post('http://localhost:5000/predict', { city });
+      const response = await axios.post('/predict', { city });
       setAqi(response.data.aqi);
       setComposition(response.data.composition);
     } catch (error) {
