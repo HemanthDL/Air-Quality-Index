@@ -1,6 +1,11 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from joblib import dump
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 # Loading the data 
@@ -22,7 +27,7 @@ def train_model(X, y):
 def save_model(model, filename):
     dump(model, filename)
 
-X_train, y_train = load_data('API_dataset_allcities.csv')
+X_train, y_train = load_data(os.environ.get("ALL_CITIES_DATASET_PATH"))
 
 rf_model = train_model(X_train, y_train)
 
